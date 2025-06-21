@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download video, music by TuHoang</title>
+    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        #linkInput {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .downloadBtn {
+            padding: 5px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .downloadBtn:hover {
+            background-color: #45a049;
+        }
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bxr {
+            font-size: 22px;
+            margin-right: 5px;
+        }
+        #thumbnail-img {
+            display: flex;
+            justify-content: center;
+        }
+        #resultTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #resultTable th, #resultTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        #resultTable th {
+            background-color: #f2f2f2;
+        }
+        .download-link {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        .download-link:hover {
+            text-decoration: underline;
+        }
+
+        .col-loading {
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .col-loading .child {
+            width: 10px;
+            height: 50%;
+            margin: 10px;
+            background-color: #a8a893;
+            animation: wave 1s infinite ease-in-out;
+        }
+        .child:nth-child(1) {animation-delay: 0s;}
+        .child:nth-child(2) {animation-delay: 0.1s;}
+        .child:nth-child(3) {animation-delay: 0.2s;}
+        .child:nth-child(4) {animation-delay: 0.3s;}
+        .child:nth-child(5) {animation-delay: 0.4s;}
+        @keyframes wave {
+            0%, 100% {
+                height: 60%;
+            }
+            50% {
+                height: 17%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="inputField">
+            <form method="post" action="/download" class="input-group">
+                <input type="text" placeholder="Nhập link video youtube..." name="link_youtube" id="linkInput" value="{{link}}" required>
+                <button class="downloadBtn" type="submit">
+                    <i class='bxr  bx-search-big'  ></i> 
+                    Search
+                </button>
+            </form>
+        </div>
+        
+        <div id="resultField">
+            <h2>{{ title }}</h2>
+            {% if thumbnail %}
+                <div id="thumbnail-img">
+                    <img src="{{ thumbnail }}" alt="Thumbnail" width="320">
+                </div>
+            {% endif %}
+            <table id="resultTable" border="1" cellpadding="8" style="display: {% if formats %} table {% else %} none {% endif %}">
+                <thead>
+                    <tr>
+                        <th>Chất lượng</th>
+                        <th>Định dạng</th>
+                        <th>Kích thước</th>
+                        <th>Link tải</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for f in formats %}
+                    <tr>
+                        <td>{{ f.resolution }}</td>
+                        <td>{{ f.ext }}</td>
+                        <td>{{ f.file_size }}</td>
+                        <td>
+                            <form method="POST" action="/fetch" onsubmit="return showLoading(this);" style="display: flex; justify-content: center;">
+                                <input type="hidden" name="link" value="{{ link }}">
+                                <input type="hidden" name="format_id" value="{{ f.format_id }}">
+                                <input type="hidden" name="ext" value="{{ f.ext }}">
+                                <input type="hidden" name="title" value="{{ title }}">
+                                <button type="submit" class="downloadBtn">
+                                    <i class='bxr  bx-arrow-to-bottom-stroke'  ></i> 
+                                    Download
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="loadingField" style="display: none;">
+            <p style="text-align: center;">Đang tải xuống, vui lòng đợi trong giây lát</p>
+            <div class="col-loading">
+                <div class="child"></div>
+                <div class="child"></div>
+                <div class="child"></div>
+                <div class="child"></div>
+                <div class="child"></div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    function showLoading(form) {
+        document.getElementById("loadingField").style.display = 'block';
+        return true; // tiếp tục submit form
+    }
+    const linkInput = document.getElementById("linkInput")
+    let isSelected = false
+
+    linkInput.addEventListener('click', function() {
+        if (!isSelected) {
+            this.select()
+            isSelected = true
+        }
+    })
+    linkInput.addEventListener('blur', function() {
+        isSelected = false
+    })
+</script>
+</html>
